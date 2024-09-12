@@ -1,0 +1,46 @@
+import time
+from w1thermsensor import W1ThermSensor
+import Adafruit_SSD1306
+from PIL import Image, ImageDraw, ImageFont
+
+# Initialize DS18B20 sensor
+sensor = W1ThermSensor()
+
+# Initialize OLED display
+disp = Adafruit_SSD1306.SSD1306_128_64(rst=None)
+disp.begin()
+disp.clear()
+disp.display()
+
+# Create blank image for drawing
+width = disp.width
+height = disp.height
+image = Image.new('1', (width, height))
+draw = ImageDraw.Draw(image)
+
+# Load a font
+font = ImageFont.load_default()
+
+while True:
+    try:
+        # Read temperature from DS18B20
+        temperature = sensor.get_temperature()
+
+        # Clear the display
+        draw.rectangle((0, 0, width, height), outline=0, fill=0)
+        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 14)  # Set font size to 24
+        # Display temperature
+        draw.text((0, 0), ' Temp: {:.1f} C'.format(temperature), font=font, fill=255)
+
+        # Display the image
+        disp.image(image)
+        disp.display()
+
+    except Exception as e:
+        # Handle errors
+        draw.rectangle((0, 0, width, height), outline=0, fill=0)
+        draw.text((0, 0), 'Error reading sensor', font=font, fill=255)
+        disp.image(image)
+        disp.display()
+
+    time.sleep(2)
